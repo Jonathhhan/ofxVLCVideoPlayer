@@ -1,18 +1,14 @@
 #include "ofApp.h"
 
-
 //--------------------------------------------------------------
 void ofApp::setup(){
     ofBackground(255,255,255);
-    ofSetWindowTitle("ofxVLCVideoPlayer example");
-    
+    ofSetWindowTitle("ofxVLCVideoPlayerExample");
     ofSetFrameRate(60); // if vertical sync is off, we can go a bit fast... this caps the framerate at 60fps.
-    
     player.loadMovie("data/fingers.mov");
     player.setLoop(true);
     thumbnail = player.getThumbnailImage();
     player.play();
-    
 }
 
 //--------------------------------------------------------------
