@@ -1,25 +1,39 @@
 #include "ofxVLCVideoPlayer.h"
 
-//using shared_ptr;
-
-ofxVLCVideoPlayer::ofxVLCVideoPlayer(void)
-{
+ofxVLCVideoPlayer::ofxVLCVideoPlayer(void) {
 }
 
 
-ofxVLCVideoPlayer::~ofxVLCVideoPlayer(void)
-{
-    //closeMovie();
+ofxVLCVideoPlayer::~ofxVLCVideoPlayer(void) {
 }
 
 bool ofxVLCVideoPlayer::loadMovie(string name) {
     closeMovie();
-    vlcMovieInstance = shared_ptr<VLCMovie>(new VLCMovie(ofToDataPath(name)));
+    vlcMovieInstance = shared_ptr<VLCMovie>(new VLCMovie(/*ofToDataPath(*/name/*)*/));
     vlcMovieInstance->init();
-    bool result = vlcMovieInstance->getIsInitialized();
+    bool result = vlcMovieInstance->getNeedsPostInit();
     if (!result) vlcMovieInstance.reset();
+    finalizeInit();
 
     return result;
+}
+
+bool ofxVLCVideoPlayer::loadMovie(void * opaqueMedia, openCallback openCb, closeCallback closeCb, readCallback readCb, seekCallback seekCb)
+{
+    closeMovie();
+    vlcMovieInstance = shared_ptr<VLCMovie>(new VLCMovie(opaqueMedia, openCb, closeCb, readCb, seekCb));
+    vlcMovieInstance->init();
+    bool result = vlcMovieInstance->getNeedsPostInit();
+    if (!result) vlcMovieInstance.reset();
+    finalizeInit();
+
+    return result;
+}
+
+void ofxVLCVideoPlayer::finalizeInit()
+{
+    if(vlcMovieInstance)
+        vlcMovieInstance->postInit();
 }
 
 void ofxVLCVideoPlayer::closeMovie() {
@@ -45,12 +59,14 @@ ofTexture &ofxVLCVideoPlayer::getTextureReference() {
 
 void ofxVLCVideoPlayer::draw(float x, float y, float w, float h) {
     if (vlcMovieInstance) {
+        ofSetColor(255, 255, 255); // Mandatory
         vlcMovieInstance->getTexture().draw(x, y, 0, w, h);
     }
 }
 
 void ofxVLCVideoPlayer::draw(float x, float y) {
     if (vlcMovieInstance) {
+        ofSetColor(255, 255, 255); // Mandatory
         vlcMovieInstance->getTexture().draw(x, y);
     }
 }
@@ -58,6 +74,12 @@ void ofxVLCVideoPlayer::draw(float x, float y) {
 void ofxVLCVideoPlayer::play() {
     if (vlcMovieInstance) {
         vlcMovieInstance->play();
+    }
+}
+
+void ofxVLCVideoPlayer::pause() {
+    if (vlcMovieInstance) {
+        vlcMovieInstance->pause();
     }
 }
 
@@ -104,19 +126,46 @@ float ofxVLCVideoPlayer::getWidth() {
 }
 
 bool ofxVLCVideoPlayer::isPlaying() {
-   if (vlcMovieInstance) {
+    if (vlcMovieInstance) {
         return vlcMovieInstance->isPlaying();
-   } else {
-       return false;
-   }
+    } else {
+        return false;
+    }
+}
+
+bool ofxVLCVideoPlayer::getNeedsPostInit()
+{
+    if (vlcMovieInstance) {
+        return vlcMovieInstance->getNeedsPostInit();
+    } else {
+        return false;
+    }
 }
 
 bool ofxVLCVideoPlayer::isLoaded() {
-   if (vlcMovieInstance) {
+    if (vlcMovieInstance) {
         return vlcMovieInstance->getIsInitialized();
-   } else {
-       return false;
-   }
+    } else {
+        return false;
+    }
+}
+
+bool ofxVLCVideoPlayer::isFrameReady()
+{
+    if (vlcMovieInstance) {
+        return vlcMovieInstance->isFirstFrameReady();
+    } else {
+        return false;
+    }
+}
+
+bool ofxVLCVideoPlayer::isRotated()
+{
+    if (vlcMovieInstance) {
+        return vlcMovieInstance->isRotated();
+    } else {
+        return false;
+    }
 }
 
 float ofxVLCVideoPlayer::getPosition() {

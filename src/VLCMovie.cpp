@@ -1,14 +1,24 @@
-//#define _WIN32_WINNT 0x0500
 #include "VLCMovie.h"
-#include <media_internal.h>
-//#include <plugins/vlc_input_item.h>
+#include <cassert>
+#include <vlc/libvlc_media.h>
+#include <vlc/libvlc_media_player.h>
 
-
-//libvlc_instance_t *VLCMovie::libvlc = NULL;
-
-//VLCMovie::VLCMovie(string filename) : filename(filename), frontImage(&image[1]), backImage(&image[0]), isFliped(true), isLooping(true), movieFinished(false), soundBuffer(2048 * 320), isInitialized(false) {
-VLCMovie::VLCMovie(string filename) : filename(filename), frontImage(&image[1]), backImage(&image[0]), isFliped(true), isLooping(true), movieFinished(false), isInitialized(false), isVLCInitialized(false), isThumbnailOK(false), frontTexture(NULL), tryUpdate(false) {
+VLCMovie::VLCMovie(string filename)
+    : mediaType(FILE), filename(filename), frontImage(&image[1]), backImage(&image[0]),
+        isFliped(false), isLooping(true), movieFinished(false), isInitialized(false),
+        isVLCInitialized(false), isThumbnailOK(false), frontTexture(NULL), tryUpdate(false)
+{
     cout << "VLCMovie constructor" << endl;
+}
+
+VLCMovie::VLCMovie(void * opaqueMedia, openCallback openCb, closeCallback closeCb,
+    readCallback readCb, seekCallback seekCb)
+    : mediaType(CALLBACKS), opaqueMedia(opaqueMedia), openCb(openCb), closeCb(closeCb),
+        readCb(readCb), seekCb(seekCb), frontImage(&image[1]), backImage(&image[0]),
+        isFliped(false), isLooping(true), movieFinished(false), isInitialized(false),
+        isVLCInitialized(false), isThumbnailOK(false), frontTexture(NULL), tryUpdate(false)
+{
+    cout << "VLCMovie constructor (callbacks)" << endl;
 }
 
 VLCMovie::~VLCMovie(void)
@@ -23,75 +33,65 @@ void VLCMovie::init() {
     initializeVLC();
     if (!isVLCInitialized) return;
 
+    needPostInit = true;
+}
+
+void VLCMovie::postInit()
+{
     for (int i = 0; i < 2; i++) {
         image[i].allocate(videoWidth, videoHeight, OF_IMAGE_COLOR_ALPHA);
     }
 
 	frontTexture = &frontImage->getTextureReference();
+
+    needPostInit = false;
     isInitialized = true;
 }
 
+void VLCMovie::loadMedia()
+{
+    if(mediaType == FILE)
+        m = libvlc_media_new_path(libvlc, filename.c_str());
+    else if(mediaType == CALLBACKS)
+        m = libvlc_media_new_callbacks(libvlc, openCb, readCb, seekCb, closeCb, opaqueMedia);
+}
+
 void VLCMovie::initializeVLC() {
-    //if (!libvlc) {
+    std::unique_lock<std::mutex> lock{playerLock};
+
         cout << "init libvlc" << endl;
         char const *vlc_argv[] = {
-            "--plugin-path=../../../data/",
             "--no-osd"
         };
 
         int vlc_argc = sizeof(vlc_argv) / sizeof(*vlc_argv);
         libvlc = libvlc_new(vlc_argc, vlc_argv);
 cout << "libvlc: " << libvlc << endl;
-        //libvlc = libvlc_new(0, NULL);
         if (!libvlc) {
             const char *error = libvlc_errmsg();
             cout << error << endl;
             return;
         }
-    //}
 
-    libvlc_audio_output_t *aout = libvlc_audio_output_list_get(libvlc);
-    while(aout) {
-        cout << aout->psz_name << endl;
-        cout << aout->psz_description << endl;
-        aout = aout->p_next;
-    }
-
-    m = libvlc_media_new_path(libvlc, filename.c_str());
+    loadMedia();
     mp = libvlc_media_player_new_from_media(m);
-	//libvlc_audio_output_set(mp, "adummy");
 	libvlc_audio_output_set(mp, "waveout");
 
-    // TODO: libvlc_video_set_formatの代わりにlibvlc_video_set_format_callbacksを使う
     videoWidth = 0;
     videoHeight = 0;
-  //  libvlc_video_set_callbacks(mp, NULL, NULL, NULL, this);
-  //  libvlc_audio_set_callbacks(mp, NULL, NULL, NULL, NULL, NULL, this);
-  //  libvlc_media_player_play(mp);
-
-  //  while (videoWidth == 0 && videoHeight == 0) {
-  //      if (!libvlc_media_player_will_play(mp))
-  //          return;
-  //      Sleep(100);
-  //      videoWidth = libvlc_video_get_width(mp);
-  //      videoHeight = libvlc_video_get_height(mp);
-		//video_length_ms = libvlc_media_player_get_length(mp);
-  //  }
-  //  libvlc_media_player_stop(mp);
-  //  libvlc_media_player_set_position(mp, 0);
 
     libvlc_media_parse(m);
+
     videoWidth = libvlc_video_get_width(mp);
     videoHeight = libvlc_video_get_height(mp);
     video_length_ms = libvlc_media_get_duration(m);
     cout << video_length_ms << endl;
-
 	cout << "Video: (" << videoWidth << ", " << videoHeight << ")" << endl;
 
     libvlc_video_set_callbacks(mp, lockForThumbnailStatic, unlockForThumbnailStatic, displayForThumbnailStatic, this);
     libvlc_video_set_format(mp, "RGBA", videoWidth, videoHeight, videoWidth * 4);
 
-	thumbnailImage.allocate(videoWidth, videoHeight, OF_IMAGE_COLOR_ALPHA);
+    thumbnailImage.allocate(videoWidth, videoHeight, OF_IMAGE_COLOR_ALPHA);
 
     libvlc_media_player_play(mp);
 #ifdef WIN32
@@ -106,8 +106,8 @@ cout << "libvlc: " << libvlc << endl;
 #else
     usleep(500 * 1000);
 #endif
-    
-	while (!isThumbnailOK) {
+
+    while (!isThumbnailOK) {
 #ifdef WIN32
         Sleep(100);
 #else
@@ -116,47 +116,37 @@ cout << "libvlc: " << libvlc << endl;
     }
     libvlc_media_player_stop(mp);
     libvlc_media_player_set_position(mp, 0);
-	//thumbnailImage.reloadTexture();
 
-	cout << "Created Thumbnail" << endl;
+    cout << "Created Thumbnail" << endl;
 	cout << "Video:length " << video_length_ms << "(ms)" << endl;
 
     libvlc_audio_output_set(mp, "aout_directx");
     libvlc_video_set_callbacks(mp, lockStatic, unlockStatic, displayStatic, this);
     libvlc_video_set_format(mp, "RGBA", videoWidth, videoHeight, videoWidth * 4);
-    
-    //libvlc_audio_set_callbacks(mp, playStatic, pauseStatic, resumeStatic, flushStatic, drainStatic, this);
-    //libvlc_audio_set_format_callbacks(mp, setupStatic, cleanupStatic);
 
     eventManager = libvlc_media_player_event_manager(mp);
     libvlc_event_attach(eventManager, libvlc_MediaPlayerEndReached, vlcEventStatic,  this);
-
-    input_item_t *it = m->p_input_item;
-    
-    for (int i = 0; i < it->i_es; i++) {
-        es_format_t *es = it->es[i];
-        if (es) {
-            if (es->video.i_frame_rate) {
-                fps = (float)es->video.i_frame_rate / es->video.i_frame_rate_base;
-                cout << "fps: " << fps << endl;
-            }
-            //cout << es->video.i_width << endl;
-        }
-    }
 
     isVLCInitialized = true;
 }
 
 void VLCMovie::cleanupVLC() {
-    libvlc_media_player_stop(mp);
-    libvlc_media_player_release(mp);
+    std::unique_lock<std::mutex> lock{playerLock};
+
+    if(isInitialized)
+    {
+        libvlc_media_player_stop(mp);
+        libvlc_media_player_release(mp);
+    }
     libvlc_media_release(m);
     libvlc_release(libvlc);
 }
 
 void VLCMovie::play() {
+    std::unique_lock<std::mutex> lock{playerLock};
+
     if (isLooping) {
-        libvlc_media_add_option(m, "input-repeat=-1");
+        libvlc_media_add_option(m, "input-repeat=65545");
     } else {
         libvlc_media_add_option(m, "input-repeat=0");
     }
@@ -166,16 +156,33 @@ void VLCMovie::play() {
 
 }
 
+void VLCMovie::pause()
+{
+    std::unique_lock<std::mutex> lock{playerLock};
+    libvlc_media_player_pause(mp);
+}
+
 void VLCMovie::rewind() {
+    std::unique_lock<std::mutex> lock{playerLock};
     libvlc_media_player_set_position(mp, 0);
 }
 
 void VLCMovie::stop() {
+    std::unique_lock<std::mutex> lock{playerLock};
+
+    if(!isInitialized)
+        return;
 
     libvlc_media_player_stop(mp);
+    movieFinished = false;
+    firstFrameReady = false;
+    setTimeMillis(0);
+    updateTexture();
 }
 
 void VLCMovie::seek(float position) {
+    std::unique_lock<std::mutex> lock{playerLock};
+
     libvlc_media_player_set_position(mp, position);
 }
 
@@ -205,34 +212,6 @@ void VLCMovie::displayForThumbnailStatic(void *data, void *id) {
 
 }
 
-//void VLCMovie::playStatic(void *data, const void *samples, unsigned int count, int64_t pts) {
-//    ((VLCMovie *)data)->play(samples, count, pts);
-//}
-//
-//void VLCMovie::pauseStatic(void *data, int64_t pts) {
-//    cout << "*****************pause*****************" << endl;
-//}
-//
-//void VLCMovie::resumeStatic(void *data, int64_t pts) {
-//    cout << "*****************resume*****************" << endl;
-//}
-//
-//void VLCMovie::flushStatic(void *data, int64_t pts) {
-//    cout << "*****************flush*****************" << endl;
-//}
-//
-//void VLCMovie::drainStatic(void *data) {
-//    cout << "*****************drain*****************" << endl;
-//}
-//
-//int VLCMovie::setupStatic(void **data, char *format, unsigned int *rate, unsigned int *channels) {
-//    return ((VLCMovie *)*data)->setup(format, rate, channels);
-//}
-//
-//void VLCMovie::cleanupStatic(void *data) {
-//    cout << "*****************cleanup*****************" << endl;
-//}
-
 void VLCMovie::vlcEventStatic(const libvlc_event_t *event, void *data) {
     ((VLCMovie *)data)->vlcEvent(event);
 }
@@ -243,22 +222,6 @@ void VLCMovie::vlcEvent(const libvlc_event_t *event) {
     }
 }
 
-//void VLCMovie::play(const void *samples, unsigned int count, int64_t pts) {
-//    //cout << "play: samples=" << samples << " count=" << count << " pts=" << pts << endl;
-//    //soundBuffer.writeBuffer((short *)samples, pts, count * audioChannels);
-//
-//}
-//
-//int VLCMovie::setup(char *format, unsigned int *rate, unsigned int *channels) {
-//    // 音声セットアップ
-//    //printf("channels: %d rate: %d format: %As\n", *channels, *rate, format); 
-//    audioChannels = *channels;
-//    //soundStream.setup(*channels, 0, *rate, 2048, 8);
-//    //soundStream.setOutput(this);
-//    return 0;
-//}
-
-
 void *VLCMovie::lock(void **p_pixels) {
     while (tryUpdate) {
 #ifdef WIN32
@@ -267,18 +230,23 @@ void *VLCMovie::lock(void **p_pixels) {
         usleep(10 * 1000);
 #endif
     }
-    //backImageMutex.lock(10000);
-    //imageFlipMutex.lock(10000);
+
+    while(!isInitialized)
+    {
+#ifdef WIN32
+        Sleep(10);
+#else
+        usleep(10 * 1000);
+#endif
+    }
+
     *p_pixels = backImage->getPixels().getData();
-    //cout << "lock " << *p_pixels << endl;
-    //imageFlipMutex.unlock();
     return NULL;
 }
 
 
 
 void VLCMovie::unlock(void *id, void *const *p_pixels) {
-    //backImageMutex.unlock();
 }
 
 void VLCMovie::display(void *id) {
@@ -290,16 +258,13 @@ void VLCMovie::display(void *id) {
 #endif
     }
 
-    //imageFlipMutex.lock(10000);
-    if (imageFlipMutex.tryLock()) {
-//cout << "flip" << endl;
+    if (imageFlipMutex.try_lock()) {
         ofImage *tmp = backImage;
         backImage = frontImage;
         frontImage = tmp;
         isFliped = true;
         imageFlipMutex.unlock();
-    } 
-    //imageFlipMutex.unlock();
+    }
 }
 
 void *VLCMovie::lockForThumbnail(void **p_pixels) {
@@ -325,31 +290,19 @@ unsigned int VLCMovie::getImageHeight() {
 void VLCMovie::updateTexture() {
     if (!isFliped) return;
     tryUpdate = true;
-    //cout << "try" << endl;
-    imageFlipMutex.lock(10000);
-    //cout << "update" << endl;
+    imageFlipMutex.lock();
     frontImage->update();
     frontTexture = &frontImage->getTextureReference();
     isFliped = false;
     imageFlipMutex.unlock();
     tryUpdate = false;
-    //cout << libvlc_video_get_width(mp) << endl;
-    //cout << libvlc_video_get_height(mp) << endl;
 
+    firstFrameReady = true;
 }
 
 ofTexture &VLCMovie::getTexture() {
     return *frontTexture;
 }
-
-////--------------------------------------------------------------
-//void VLCMovie::audioOut(float *input, int bufferSize, int nChannels) {
-//    //cout << "bufSize=" << bufferSize << " channel=" << nChannels << endl;
-//    //cout << "readBuffer=" << soundBuffer.readBuffer(input) << endl;
-//    int64_t ts;
-//    //soundBuffer.readBuffer(input, &ts, bufferSize * nChannels);
-//
-//}
 
 void VLCMovie::setLoop(bool isLooping) {
     this->isLooping = isLooping;
@@ -363,8 +316,39 @@ bool VLCMovie::isPlaying() {
     return libvlc_media_player_is_playing(mp);
 }
 
+bool VLCMovie::isFirstFrameReady()
+{
+    return firstFrameReady;
+}
+
+bool VLCMovie::isRotated()
+{
+    libvlc_media_track_t ** tracks;
+    unsigned count = libvlc_media_tracks_get(m, &tracks);
+    if(!count)
+        return false;
+
+    for(size_t trackIdx = 0; trackIdx < count; ++trackIdx)
+    {
+        if(tracks[trackIdx]->i_type == libvlc_track_video)
+        {
+            libvlc_video_orient_t orientation = tracks[trackIdx]->video->i_orientation;
+            libvlc_media_tracks_release(tracks, count);
+            return orientation == libvlc_video_orient_left_bottom
+                || orientation == libvlc_video_orient_right_top;
+        }
+    }
+    libvlc_media_tracks_release(tracks, count);
+    return false;
+}
+
 bool VLCMovie::getIsInitialized() {
     return isInitialized;
+}
+
+bool VLCMovie::getNeedsPostInit()
+{
+    return needPostInit;
 }
 
 float VLCMovie::getPosition() {
@@ -387,8 +371,12 @@ float VLCMovie::getFPS() {
     return fps;
 }
 
+void VLCMovie::setFPS(float fps) {
+    VLCMovie::fps = fps;
+}
+
 float VLCMovie::getDuration() {
-    return video_length_ms / fps;
+    return video_length_ms;
 }
 
 void VLCMovie::setFrame(int frame) {
@@ -407,9 +395,11 @@ int VLCMovie::getTotalNumFrames() {
 }
 
 void VLCMovie::setVolume(int volume) {
+    std::unique_lock<std::mutex> lock{playerLock};
     libvlc_audio_set_volume(mp, volume);
 }
 
 void VLCMovie::toggleMute() {
+    std::unique_lock<std::mutex> lock{playerLock};
     libvlc_audio_toggle_mute(mp);
 }
