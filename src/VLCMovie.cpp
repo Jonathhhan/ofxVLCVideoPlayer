@@ -94,31 +94,19 @@ cout << "libvlc: " << libvlc << endl;
     thumbnailImage.allocate(videoWidth, videoHeight, OF_IMAGE_COLOR_ALPHA);
 
     libvlc_media_player_play(mp);
-#ifdef WIN32
-    Sleep(500);
-#else
-    usleep(500 * 1000);
-#endif
-
     libvlc_media_player_set_position(mp, 0.5);
-#ifdef WIN32
-    Sleep(500);
-#else
-    usleep(500 * 1000);
-#endif
-
     while (!isThumbnailOK) {
 #ifdef WIN32
-        Sleep(100);
+        Sleep(0);
 #else
-        usleep(100 * 1000);
+        usleep(0);
 #endif
     }
     libvlc_media_player_stop(mp);
     libvlc_media_player_set_position(mp, 0);
 
     cout << "Created Thumbnail" << endl;
-	cout << "Video:length " << video_length_ms << "(ms)" << endl;
+    cout << "Video:length " << video_length_ms << "(ms)" << endl;
 
     libvlc_audio_output_set(mp, "aout_directx");
     libvlc_video_set_callbacks(mp, lockStatic, unlockStatic, displayStatic, this);
