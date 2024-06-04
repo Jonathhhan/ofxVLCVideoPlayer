@@ -21,7 +21,7 @@ void ofApp::draw() {
     thumbnail.draw(0, 0, 320, 240);
     player.draw(0, 0, 320, 240);
     ofDrawBitmapString("FPS: " + ofToString(ofGetFrameRate()), 20, 20);
-    ofDrawBitmapString("Position: " + ofToString(player.getPosition()), 20, 40);
+    ofDrawBitmapString("Second: " + ofToString(player.getPosition() * player.getDuration() / 1000), 20, 40);
 }
 
 //--------------------------------------------------------------
