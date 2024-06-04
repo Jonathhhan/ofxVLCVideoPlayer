@@ -48,12 +48,16 @@ void VLCMovie::postInit()
     isInitialized = true;
 }
 
-void VLCMovie::loadMedia()
-{
-    if(mediaType == FILE)
-        m = libvlc_media_new_path(libvlc, filename.c_str());
-    else if(mediaType == CALLBACKS)
+void VLCMovie::loadMedia() {
+    if (mediaType == FILE) {
+        if ("http" == filename.substr(0, 4)) {
+            m = libvlc_media_new_location(libvlc, filename.c_str());
+        } else {
+            m = libvlc_media_new_path(libvlc, filename.c_str());
+        }
+    } else if(mediaType == CALLBACKS) {
         m = libvlc_media_new_callbacks(libvlc, openCb, readCb, seekCb, closeCb, opaqueMedia);
+        }
 }
 
 void VLCMovie::initializeVLC() {
