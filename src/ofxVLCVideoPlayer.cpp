@@ -17,17 +17,6 @@ bool ofxVLCVideoPlayer::loadMovie(std::string name) {
     return result;
 }
 
-bool ofxVLCVideoPlayer::loadMovie(void* opaqueMedia, openCallback openCb, closeCallback closeCb, readCallback readCb, seekCallback seekCb) {
-    closeMovie();
-    vlcMovieInstance = shared_ptr<VLCMovie>(new VLCMovie(opaqueMedia, openCb, closeCb, readCb, seekCb));
-    vlcMovieInstance->init();
-    bool result = vlcMovieInstance->getNeedsPostInit();
-    if (!result) vlcMovieInstance.reset();
-    finalizeInit();
-
-    return result;
-}
-
 void ofxVLCVideoPlayer::finalizeInit() {
     if (vlcMovieInstance) {
         vlcMovieInstance->postInit();

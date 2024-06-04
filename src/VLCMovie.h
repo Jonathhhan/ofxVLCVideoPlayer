@@ -14,8 +14,7 @@ typedef ssize_t(*readCallback) (void* opaque, unsigned char* buf, size_t len);
 typedef int     (*seekCallback) (void* opaque, uint64_t offset);
 
 //class VLCMovie : public AbstractMovie, public ofBaseSoundOutput
-class VLCMovie
-{
+class VLCMovie {
     enum { FILE, CALLBACKS } mediaType;
     string filename;
     void* opaqueMedia;

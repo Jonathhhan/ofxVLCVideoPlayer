@@ -3,8 +3,7 @@
 #include <memory>
 #include "VLCMovie.h"
 
-class ofxVLCVideoPlayer
-{
+class ofxVLCVideoPlayer {
     shared_ptr<VLCMovie> vlcMovieInstance;
     ofTexture dummyTexture;
     ofImage dummyImage;
@@ -12,7 +11,6 @@ public:
     ofxVLCVideoPlayer(void);
     ~ofxVLCVideoPlayer(void);
     bool loadMovie(std::string name);
-    bool loadMovie(void* opaqueMedia, openCallback openCb, closeCallback closeCb, readCallback readCb, seekCallback seekCb);
     void finalizeInit(); // Needs to be called after loadMovie or when getNeedsPostInit and from open frameworks thread
     void closeMovie();
     void update();
