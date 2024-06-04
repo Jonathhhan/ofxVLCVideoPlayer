@@ -86,8 +86,10 @@ cout << "libvlc: " << libvlc << endl;
 
     libvlc_media_parse(m);
 
-    videoWidth = libvlc_video_get_width(mp);
-    videoHeight = libvlc_video_get_height(mp);
+    unsigned int x, y;
+    libvlc_video_get_size(mp,0,&x,&y);
+    videoWidth = x;
+    videoHeight = y;
     video_length_ms = libvlc_media_get_duration(m);
     cout << video_length_ms << endl;
 	cout << "Video: (" << videoWidth << ", " << videoHeight << ")" << endl;
