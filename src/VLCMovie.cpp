@@ -86,7 +86,8 @@ void VLCMovie::initializeVLC() {
     if (libvlc_video_get_size(mp, 0, &x, &y) != -1) {
         videoWidth = x;
         videoHeight = y;
-    } else {
+    }
+    else {
         videoWidth = 1280;
         videoHeight = 720;
     }

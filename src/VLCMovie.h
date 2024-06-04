@@ -8,32 +8,32 @@ typedef SSIZE_T ssize_t;
 #include <vlc/vlc.h>
 #include <memory>
 
-typedef int     (*openCallback) (void *opaque, void **datap, uint64_t *sizep);
-typedef void    (*closeCallback)(void *opaque);
-typedef ssize_t (*readCallback) (void *opaque, unsigned char *buf, size_t len);
-typedef int     (*seekCallback) (void *opaque, uint64_t offset);
+typedef int     (*openCallback) (void* opaque, void** datap, uint64_t* sizep);
+typedef void    (*closeCallback)(void* opaque);
+typedef ssize_t(*readCallback) (void* opaque, unsigned char* buf, size_t len);
+typedef int     (*seekCallback) (void* opaque, uint64_t offset);
 
 //class VLCMovie : public AbstractMovie, public ofBaseSoundOutput
 class VLCMovie
 {
     enum { FILE, CALLBACKS } mediaType;
     string filename;
-    void * opaqueMedia;
+    void* opaqueMedia;
     openCallback openCb;
     closeCallback closeCb;
     readCallback readCb;
     seekCallback seekCb;
 
     ofImage image[2];
-    ofImage *frontImage;
-    ofImage *backImage;
-    ofTexture *frontTexture;
-	ofImage thumbnailImage;
+    ofImage* frontImage;
+    ofImage* backImage;
+    ofTexture* frontTexture;
+    ofImage thumbnailImage;
 
-    libvlc_instance_t *libvlc;
-    libvlc_media_t *m;
-    libvlc_media_player_t *mp;
-    libvlc_event_manager_t *eventManager;
+    libvlc_instance_t* libvlc;
+    libvlc_media_t* m;
+    libvlc_media_player_t* mp;
+    libvlc_event_manager_t* eventManager;
 
     void initializeVLC();
     void loadMedia();
@@ -44,8 +44,8 @@ class VLCMovie
 
     int videoWidth, videoHeight;
     float fps = -1;
-	libvlc_time_t video_length_ms;
-	bool isThumbnailOK;
+    libvlc_time_t video_length_ms;
+    bool isThumbnailOK;
     bool isFliped;
     bool isLooping;
     bool tryUpdate;
@@ -59,21 +59,21 @@ class VLCMovie
     std::mutex imageFlipMutex;
 
     // VLC Video callbaks
-    static void *lockStatic(void *data, void **p_pixels);
-    static void unlockStatic(void *data, void *id, void *const *p_pixels);
-    static void displayStatic(void *data, void *id);
+    static void* lockStatic(void* data, void** p_pixels);
+    static void unlockStatic(void* data, void* id, void* const* p_pixels);
+    static void displayStatic(void* data, void* id);
 
-	void *lock(void **p_pixels);
-    void unlock(void *id, void *const *p_pixels);
-    void display(void *id);
+    void* lock(void** p_pixels);
+    void unlock(void* id, void* const* p_pixels);
+    void display(void* id);
 
     // VLC Event callbacks
-    static void vlcEventStatic(const libvlc_event_t *event, void *data);
-    void vlcEvent(const libvlc_event_t *event);
+    static void vlcEventStatic(const libvlc_event_t* event, void* data);
+    void vlcEvent(const libvlc_event_t* event);
 
 public:
     VLCMovie(string filename);
-    VLCMovie(void * opaqueMedia, openCallback openCb, closeCallback closeCb, readCallback readCb, seekCallback seekCb);
+    VLCMovie(void* opaqueMedia, openCallback openCb, closeCallback closeCb, readCallback readCb, seekCallback seekCb);
     ~VLCMovie(void);
     void init();
     void postInit(); // For initialization that needs to be done in the same thread as open frameworks
@@ -90,15 +90,15 @@ public:
     float getDuration();
     int getTotalNumFrames();
     void updateTexture();
-    ofTexture &getTexture();
+    ofTexture& getTexture();
     bool isMovieFinished();
     bool isPlaying();
     bool isFirstFrameReady();
     bool isRotated();
     bool getIsInitialized();
     bool getNeedsPostInit();
-	float getPosition();
-	libvlc_time_t getTimeMillis();
+    float getPosition();
+    libvlc_time_t getTimeMillis();
     void setTimeMillis(libvlc_time_t ms);
     void setFrame(int frame);
     int getCurrentFrame();
