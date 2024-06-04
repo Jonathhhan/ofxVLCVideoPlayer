@@ -11,7 +11,7 @@ class ofxVLCVideoPlayer
 public:
     ofxVLCVideoPlayer(void);
     ~ofxVLCVideoPlayer(void);
-    bool loadMovie(string name);
+    bool loadMovie(std::string name);
     bool loadMovie(void * opaqueMedia, openCallback openCb, closeCallback closeCb, readCallback readCb, seekCallback seekCb);
     void finalizeInit(); // Needs to be called after loadMovie or when getNeedsPostInit and from open frameworks thread
     void closeMovie();

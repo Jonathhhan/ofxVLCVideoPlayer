@@ -63,17 +63,9 @@ class VLCMovie
     static void unlockStatic(void *data, void *id, void *const *p_pixels);
     static void displayStatic(void *data, void *id);
 
-	static void *lockForThumbnailStatic(void *data, void **p_pixels);
-    static void unlockForThumbnailStatic(void *data, void *id, void *const *p_pixels);
-    static void displayForThumbnailStatic(void *data, void *id);
-
 	void *lock(void **p_pixels);
     void unlock(void *id, void *const *p_pixels);
     void display(void *id);
-
-	void *lockForThumbnail(void **p_pixels);
-    void unlockForThumbnail(void *id, void *const *p_pixels);
-    void displayForThumbnail(void *id);
 
     // VLC Event callbacks
     static void vlcEventStatic(const libvlc_event_t *event, void *data);
@@ -99,7 +91,6 @@ public:
     int getTotalNumFrames();
     void updateTexture();
     ofTexture &getTexture();
-	ofImage &getThumbnailImage();
     bool isMovieFinished();
     bool isPlaying();
     bool isFirstFrameReady();

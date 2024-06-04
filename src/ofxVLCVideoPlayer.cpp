@@ -3,7 +3,6 @@
 ofxVLCVideoPlayer::ofxVLCVideoPlayer(void) {
 }
 
-
 ofxVLCVideoPlayer::~ofxVLCVideoPlayer(void) {
 }
 
@@ -59,14 +58,12 @@ ofTexture &ofxVLCVideoPlayer::getTextureReference() {
 
 void ofxVLCVideoPlayer::draw(float x, float y, float w, float h) {
     if (vlcMovieInstance) {
-        ofSetColor(255, 255, 255); // Mandatory
         vlcMovieInstance->getTexture().draw(x, y, 0, w, h);
     }
 }
 
 void ofxVLCVideoPlayer::draw(float x, float y) {
     if (vlcMovieInstance) {
-        ofSetColor(255, 255, 255); // Mandatory
         vlcMovieInstance->getTexture().draw(x, y);
     }
 }
@@ -169,18 +166,10 @@ bool ofxVLCVideoPlayer::isRotated()
 }
 
 float ofxVLCVideoPlayer::getPosition() {
-    if (vlcMovieInstance) {
+    if (vlcMovieInstance && vlcMovieInstance->getPosition() >= 0) {
         return vlcMovieInstance->getPosition();
     } else {
         return 0;
-    }
-}
-
-ofImage &ofxVLCVideoPlayer::getThumbnailImage() {
-    if (vlcMovieInstance) {
-        return vlcMovieInstance->getThumbnailImage();
-    } else {
-        return dummyImage;
     }
 }
 
