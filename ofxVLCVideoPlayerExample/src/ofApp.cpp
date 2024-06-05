@@ -24,12 +24,7 @@ void ofApp::draw() {
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
-    if (key == 112) {
-        player.play();
-    }
-    else if (key == 115) {
-        player.stop();
-    }
+    player.pause();
 }
 
 //--------------------------------------------------------------
