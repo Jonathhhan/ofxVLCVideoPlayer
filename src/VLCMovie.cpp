@@ -6,8 +6,7 @@
 VLCMovie::VLCMovie(string filename)
     : mediaType(FILE), filename(filename), frontImage(&image[1]), backImage(&image[0]),
     isFliped(false), isLooping(true), movieFinished(false), isInitialized(false),
-    isVLCInitialized(false), isThumbnailOK(false), frontTexture(NULL), tryUpdate(false)
-{
+    isVLCInitialized(false), isThumbnailOK(false), frontTexture(NULL), tryUpdate(false) {
     cout << "VLCMovie constructor" << endl;
 }
 
@@ -16,8 +15,7 @@ VLCMovie::VLCMovie(void* opaqueMedia, openCallback openCb, closeCallback closeCb
     : mediaType(CALLBACKS), opaqueMedia(opaqueMedia), openCb(openCb), closeCb(closeCb),
     readCb(readCb), seekCb(seekCb), frontImage(&image[1]), backImage(&image[0]),
     isFliped(false), isLooping(true), movieFinished(false), isInitialized(false),
-    isVLCInitialized(false), isThumbnailOK(false), frontTexture(NULL), tryUpdate(false)
-{
+    isVLCInitialized(false), isThumbnailOK(false), frontTexture(NULL), tryUpdate(false) {
     cout << "VLCMovie constructor (callbacks)" << endl;
 }
 
@@ -28,16 +26,17 @@ VLCMovie::~VLCMovie(void)
 }
 
 void VLCMovie::init() {
-    if (isInitialized) return;
-
+    if (isInitialized) {
+        return;
+    }
     initializeVLC();
-    if (!isVLCInitialized) return;
-
+    if (!isVLCInitialized) {
+        return;
+    }
     needPostInit = true;
 }
 
-void VLCMovie::postInit()
-{
+void VLCMovie::postInit() {
     for (int i = 0; i < 2; i++) {
         image[i].allocate(videoWidth, videoHeight, OF_IMAGE_COLOR_ALPHA);
     }
@@ -146,8 +145,9 @@ void VLCMovie::rewind() {
 void VLCMovie::stop() {
     std::unique_lock<std::mutex> lock{ playerLock };
 
-    if (!isInitialized)
+    if (!isInitialized) {
         return;
+    }
 
     libvlc_media_player_stop(mp);
     movieFinished = false;
@@ -274,9 +274,9 @@ bool VLCMovie::isRotated()
 {
     libvlc_media_track_t** tracks;
     unsigned count = libvlc_media_tracks_get(m, &tracks);
-    if (!count)
+    if (!count) {
         return false;
-
+    }
     for (size_t trackIdx = 0; trackIdx < count; ++trackIdx)
     {
         if (tracks[trackIdx]->i_type == libvlc_track_video)
