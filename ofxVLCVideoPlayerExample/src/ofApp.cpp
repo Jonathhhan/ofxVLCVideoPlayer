@@ -5,7 +5,7 @@ void ofApp::setup() {
     ofBackground(255, 255, 255);
     ofSetWindowTitle("ofxVLCVideoPlayerExample");
     ofSetFrameRate(60); // if vertical sync is off, we can go a bit fast... this caps the framerate at 60fps.
-    player.loadMovie("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4");
+    player.loadMovie("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny");
     player.setLoop(true);
     player.play();
 }
@@ -26,7 +26,8 @@ void ofApp::draw() {
 void ofApp::keyPressed(int key) {
     if (key == 112) {
         player.play();
-    } else if (key == 115) {
+    }
+    else if (key == 115) {
         player.stop();
     }
 }
