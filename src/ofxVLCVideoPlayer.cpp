@@ -12,15 +12,8 @@ bool ofxVLCVideoPlayer::loadMovie(std::string name) {
     vlcMovieInstance->init();
     bool result = vlcMovieInstance->getNeedsPostInit();
     if (!result) vlcMovieInstance.reset();
-    finalizeInit();
-
+    vlcMovieInstance->postInit();
     return result;
-}
-
-void ofxVLCVideoPlayer::finalizeInit() {
-    if (vlcMovieInstance) {
-        vlcMovieInstance->postInit();
-    }
 }
 
 void ofxVLCVideoPlayer::closeMovie() {
@@ -123,36 +116,9 @@ bool ofxVLCVideoPlayer::isPlaying() {
     }
 }
 
-bool ofxVLCVideoPlayer::getNeedsPostInit() {
-    if (vlcMovieInstance) {
-        return vlcMovieInstance->getNeedsPostInit();
-    }
-    else {
-        return false;
-    }
-}
-
 bool ofxVLCVideoPlayer::isLoaded() {
     if (vlcMovieInstance) {
         return vlcMovieInstance->getIsInitialized();
-    }
-    else {
-        return false;
-    }
-}
-
-bool ofxVLCVideoPlayer::isFrameReady() {
-    if (vlcMovieInstance) {
-        return vlcMovieInstance->isFirstFrameReady();
-    }
-    else {
-        return false;
-    }
-}
-
-bool ofxVLCVideoPlayer::isRotated() {
-    if (vlcMovieInstance) {
-        return vlcMovieInstance->isRotated();
     }
     else {
         return false;

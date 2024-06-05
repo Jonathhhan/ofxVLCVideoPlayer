@@ -11,7 +11,6 @@ public:
     ofxVLCVideoPlayer(void);
     ~ofxVLCVideoPlayer(void);
     bool loadMovie(std::string name);
-    void finalizeInit(); // Needs to be called after loadMovie or when getNeedsPostInit and from open frameworks thread
     void closeMovie();
     void update();
     ofTexture& getTextureReference();
@@ -26,10 +25,7 @@ public:
     float getHeight();
     float getWidth();
     bool isPlaying();
-    bool getNeedsPostInit();
     bool isLoaded();
-    bool isFrameReady();
-    bool isRotated();
     float getPosition();
     int getTimeMillis();
     void setTimeMillis(int ms);
