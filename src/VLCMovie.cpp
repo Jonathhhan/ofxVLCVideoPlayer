@@ -66,7 +66,7 @@ void VLCMovie::initializeVLC() {
 
     cout << "init libvlc" << endl;
     char const* vlc_argv[] = {
-        "--no-osd"
+        "--audio-visual=goom"
     };
 
     int vlc_argc = sizeof(vlc_argv) / sizeof(*vlc_argv);
