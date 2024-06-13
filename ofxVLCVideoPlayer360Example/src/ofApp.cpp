@@ -21,13 +21,13 @@ void ofApp::update() {
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-    ofDrawBitmapString("FPS: " + ofToString(ofGetFrameRate()), 20, 20);
-    ofDrawBitmapString("Second: " + ofToString(player.getPosition() * player.getDuration() / 1000), 20, 40);
     cam.begin();
     player.getTexture().bind();
     sphere.draw();
     player.getTexture().unbind();
     cam.end();
+    ofDrawBitmapString("FPS: " + ofToString(ofGetFrameRate()), 20, 20);
+    ofDrawBitmapString("Second: " + ofToString(player.getPosition() * player.getDuration() / 1000), 20, 40);
 }
 
 //--------------------------------------------------------------
