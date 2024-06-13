@@ -55,7 +55,7 @@ void VLCMovie::init(int vlc_argc, char const* vlc_argv[]) {
     for (int i = 0; i < 2; i++) {
         image[i].allocate(videoWidth, videoHeight, OF_IMAGE_COLOR_ALPHA);
     }
-    frontTexture = &frontImage->getTextureReference();
+    frontTexture = &frontImage->getTexture();
 
     isInitialized = true;
 }
