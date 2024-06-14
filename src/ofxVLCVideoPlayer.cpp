@@ -8,7 +8,7 @@ ofxVLCVideoPlayer::~ofxVLCVideoPlayer(void) {
 
 void ofxVLCVideoPlayer::loadMovie(std::string name, int vlc_argc, char const* vlc_argv[]) {
     closeMovie();
-    vlcMovieInstance = shared_ptr<VLCMovie>(new VLCMovie(name));
+    vlcMovieInstance = shared_ptr<ofxVLCMovie>(new ofxVLCMovie(name));
     vlcMovieInstance->init(vlc_argc, vlc_argv);
 }
 

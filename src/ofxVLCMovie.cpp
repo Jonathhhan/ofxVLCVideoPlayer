@@ -3,19 +3,19 @@
 #include <vlc/libvlc_media.h>
 #include <vlc/libvlc_media_player.h>
 
-VLCMovie::VLCMovie(std::string filename)
+ofxVLCMovie::ofxVLCMovie(std::string filename)
     : filename(filename), frontImage(&image[1]), backImage(&image[0]), isLooping(true),
     movieFinished(false), isInitialized(false), frontTexture(NULL), libvlc(NULL), eventManager(NULL),
     m(NULL), mp(NULL), videoHeight(0), videoWidth(0), video_length_ms(0) {
     cout << "VLCMovie constructor" << endl;
 }
 
-VLCMovie::~VLCMovie(void) {
+ofxVLCMovie::~ofxVLCMovie(void) {
     cout << "VLCMovie destructor" << endl;
     cleanupVLC();
 }
 
-void VLCMovie::init(int vlc_argc, char const* vlc_argv[]) {
+void ofxVLCMovie::init(int vlc_argc, char const* vlc_argv[]) {
     libvlc = libvlc_new(vlc_argc, vlc_argv);
     if (!libvlc) {
         const char* error = libvlc_errmsg();
@@ -30,7 +30,7 @@ void VLCMovie::init(int vlc_argc, char const* vlc_argv[]) {
         m = libvlc_media_new_path(libvlc, filename.c_str());
     }
 
-    //libvlc_media_add_option(m, ":sout=#duplicate{dst=display,dst=std{access=file,mux=mp4,dst=xyz.mp4}"); // This line of code records the video input into an mp4 file.
+    //libvlc_media_add_option(m, ":sout=#duplicate{dst=display,dst=std{access=file,mux=mp4,dst=xyz.mp4}");
     mp = libvlc_media_player_new_from_media(m);
     libvlc_media_parse(m);
     unsigned int x, y;
@@ -61,7 +61,7 @@ void VLCMovie::init(int vlc_argc, char const* vlc_argv[]) {
     isInitialized = true;
 }
 
-void VLCMovie::cleanupVLC() {
+void ofxVLCMovie::cleanupVLC() {
     if (isInitialized)
     {
         libvlc_media_player_stop(mp);
@@ -71,7 +71,7 @@ void VLCMovie::cleanupVLC() {
     libvlc_release(libvlc);
 }
 
-void VLCMovie::play() {
+void ofxVLCMovie::play() {
     if (isLooping) {
         libvlc_media_add_option(m, "input-repeat=65545");
     }
@@ -82,11 +82,11 @@ void VLCMovie::play() {
     libvlc_media_player_play(mp);
 }
 
-void VLCMovie::pause() {
+void ofxVLCMovie::pause() {
     libvlc_media_player_pause(mp);
 }
 
-void VLCMovie::stop() {
+void ofxVLCMovie::stop() {
     if (!isInitialized) {
         return;
     }
@@ -97,127 +97,127 @@ void VLCMovie::stop() {
     updateTexture();
 }
 
-void VLCMovie::setPosition(float position) {
+void ofxVLCMovie::setPosition(float position) {
     libvlc_media_player_set_position(mp, position);
 }
 
-void* VLCMovie::lockStatic(void* data, void** p_pixels) {
-    return ((VLCMovie*)data)->lock(p_pixels);
+void* ofxVLCMovie::lockStatic(void* data, void** p_pixels) {
+    return ((ofxVLCMovie*)data)->lock(p_pixels);
 }
 
-void VLCMovie::unlockStatic(void* data, void* id, void* const* p_pixels) {
-    ((VLCMovie*)data)->unlock(id, p_pixels);
+void ofxVLCMovie::unlockStatic(void* data, void* id, void* const* p_pixels) {
+    ((ofxVLCMovie*)data)->unlock(id, p_pixels);
 }
 
-void VLCMovie::displayStatic(void* data, void* id) {
-    ((VLCMovie*)data)->display(id);
+void ofxVLCMovie::displayStatic(void* data, void* id) {
+    ((ofxVLCMovie*)data)->display(id);
 }
 
-void VLCMovie::vlcEventStatic(const libvlc_event_t* event, void* data) {
-    ((VLCMovie*)data)->vlcEvent(event);
+void ofxVLCMovie::vlcEventStatic(const libvlc_event_t* event, void* data) {
+    ((ofxVLCMovie*)data)->vlcEvent(event);
 }
 
-void VLCMovie::vlcEvent(const libvlc_event_t* event) {
+void ofxVLCMovie::vlcEvent(const libvlc_event_t* event) {
     if (event->type == libvlc_MediaPlayerEndReached) {
         movieFinished = true;
     }
 }
 
-void* VLCMovie::lock(void** p_pixels) {
+void* ofxVLCMovie::lock(void** p_pixels) {
     *p_pixels = backImage->getPixels().getData();
     return NULL;
 }
 
-void VLCMovie::unlock(void* id, void* const* p_pixels) {
+void ofxVLCMovie::unlock(void* id, void* const* p_pixels) {
 }
 
-void VLCMovie::display(void* id) {
+void ofxVLCMovie::display(void* id) {
     ofImage* tmp = backImage;
     backImage = frontImage;
     frontImage = tmp;
 }
 
-unsigned int VLCMovie::getImageWidth() {
+unsigned int ofxVLCMovie::getImageWidth() {
     return videoWidth;
 }
 
-unsigned int VLCMovie::getImageHeight() {
+unsigned int ofxVLCMovie::getImageHeight() {
     return videoHeight;
 }
 
-void VLCMovie::updateTexture() {
+void ofxVLCMovie::updateTexture() {
     frontImage->update();
     frontTexture = &frontImage->getTexture();
     firstFrameReady = true;
 }
 
-ofTexture& VLCMovie::getTexture() {
+ofTexture& ofxVLCMovie::getTexture() {
     return *frontTexture;
 }
 
-void VLCMovie::setLoop(bool isLooping) {
+void ofxVLCMovie::setLoop(bool isLooping) {
     this->isLooping = isLooping;
 }
 
-bool VLCMovie::isMovieFinished() {
+bool ofxVLCMovie::isMovieFinished() {
     return movieFinished;
 }
 
-bool VLCMovie::isPlaying() {
+bool ofxVLCMovie::isPlaying() {
     return libvlc_media_player_is_playing(mp);
 }
 
-bool VLCMovie::isFirstFrameReady() {
+bool ofxVLCMovie::isFirstFrameReady() {
     return firstFrameReady;
 }
 
-bool VLCMovie::getIsInitialized() {
+bool ofxVLCMovie::getIsInitialized() {
     return isInitialized;
 }
 
-float VLCMovie::getPosition() {
+float ofxVLCMovie::getPosition() {
     return libvlc_media_player_get_position(mp);
 }
 
-libvlc_time_t VLCMovie::getTimeMillis() {
+libvlc_time_t ofxVLCMovie::getTimeMillis() {
     return libvlc_media_player_get_time(mp);
 }
 
-void VLCMovie::setTimeMillis(libvlc_time_t ms) {
+void ofxVLCMovie::setTimeMillis(libvlc_time_t ms) {
     libvlc_media_player_set_time(mp, ms);
 }
 
-float VLCMovie::getFPS() {
+float ofxVLCMovie::getFPS() {
     return fps;
 }
 
-void VLCMovie::setFPS(float fps) {
-    VLCMovie::fps = fps;
+void ofxVLCMovie::setFPS(float fps) {
+    ofxVLCMovie::fps = fps;
 }
 
-float VLCMovie::getDuration() {
+float ofxVLCMovie::getDuration() {
     return video_length_ms;
 }
 
-void VLCMovie::setFrame(int frame) {
+void ofxVLCMovie::setFrame(int frame) {
     libvlc_time_t ms = 1000 * frame / fps;
     setTimeMillis(ms);
 }
 
-int VLCMovie::getCurrentFrame() {
+int ofxVLCMovie::getCurrentFrame() {
     libvlc_time_t ms = getTimeMillis();
     int frame = fps * ms / 1000;
     return frame;
 }
 
-int VLCMovie::getTotalNumFrames() {
+int ofxVLCMovie::getTotalNumFrames() {
     return fps * video_length_ms / 1000;
 }
 
-void VLCMovie::setVolume(int volume) {
+void ofxVLCMovie::setVolume(int volume) {
     libvlc_audio_set_volume(mp, volume);
 }
 
-void VLCMovie::toggleMute() {
+void ofxVLCMovie::toggleMute() {
     libvlc_audio_toggle_mute(mp);
 }

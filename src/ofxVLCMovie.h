@@ -8,7 +8,7 @@ typedef SSIZE_T ssize_t;
 #include "vlc/vlc.h"
 #include <memory>
 
-class VLCMovie {
+class ofxVLCMovie {
     string filename;
 
     ofImage image[2];
@@ -21,7 +21,6 @@ class VLCMovie {
     libvlc_media_player_t* mp;
     libvlc_event_manager_t* eventManager;
 
-    void loadMedia();
     void cleanupVLC();
 
     bool isInitialized;
@@ -46,8 +45,8 @@ class VLCMovie {
     void vlcEvent(const libvlc_event_t* event);
 
 public:
-    VLCMovie(std::string filename);
-    ~VLCMovie(void);
+    ofxVLCMovie(std::string filename);
+    ~ofxVLCMovie(void);
     void init(int vlc_argc, char const* vlc_argv[]);
     void play();
     void pause();

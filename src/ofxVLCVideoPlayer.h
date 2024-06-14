@@ -4,7 +4,7 @@
 #include "ofxVLCMovie.h"
 
 class ofxVLCVideoPlayer {
-    shared_ptr<VLCMovie> vlcMovieInstance;
+    shared_ptr<ofxVLCMovie> vlcMovieInstance;
     ofTexture dummyTexture;
     ofImage dummyImage;
 public:
