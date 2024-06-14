@@ -34,15 +34,6 @@ ofTexture& ofxVLCVideoPlayer::getTexture() {
     }
 }
 
-void ofxVLCVideoPlayer::setTexture(ofTexture tex) {
-    if (vlcMovieInstance) {
-        vlcMovieInstance->getTexture().setUseExternalTextureID(tex.texData.textureID);
-    }
-    else {
-        dummyTexture;
-    }
-}
-
 void ofxVLCVideoPlayer::draw(float x, float y, float w, float h) {
     if (vlcMovieInstance) {
         vlcMovieInstance->getTexture().draw(x, y, 0, w, h);
