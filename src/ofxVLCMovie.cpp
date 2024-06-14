@@ -30,7 +30,7 @@ void VLCMovie::init(int vlc_argc, char const* vlc_argv[]) {
         m = libvlc_media_new_path(libvlc, filename.c_str());
     }
 
-    //libvlc_media_add_option(m, ":sout=#duplicate{dst=display,dst=std{access=file,mux=mp4,dst=xyz.mp4}");
+    //libvlc_media_add_option(m, ":sout=#duplicate{dst=display,dst=std{access=file,mux=mp4,dst=xyz.mp4}"); // This line of code records the video input into an mp4 file.
     mp = libvlc_media_player_new_from_media(m);
     libvlc_media_parse(m);
     unsigned int x, y;
