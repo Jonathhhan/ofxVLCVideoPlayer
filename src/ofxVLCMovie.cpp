@@ -72,7 +72,7 @@ void ofxVLCMovie::cleanupVLC() {
 
 void ofxVLCMovie::play() {
     if (isLooping) {
-        libvlc_media_add_option(m, "input-repeat=65545");
+        libvlc_media_add_option(m, "input-repeat=-1");
     }
     else {
         libvlc_media_add_option(m, "input-repeat=0");
