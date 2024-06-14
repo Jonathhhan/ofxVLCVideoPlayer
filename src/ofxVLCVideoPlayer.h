@@ -13,7 +13,6 @@ public:
     void loadMovie(std::string name, int vlc_argc, char const* vlc_argv[]);
     void closeMovie();
     void update();
-    void setTexture(ofTexture tex);
     ofTexture& getTexture();
     void draw(float x, float y, float w, float h);
     void draw(float x, float y);
