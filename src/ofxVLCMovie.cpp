@@ -46,7 +46,6 @@ void ofxVLCMovie::init(int vlc_argc, char const* vlc_argv[]) {
     cout << "Video size: (" << videoWidth << ", " << videoHeight << ")" << endl;
     cout << "Video length: " << video_length_ms << "(ms)" << endl;
 
-    libvlc_audio_output_set(mp, "aout_directx");
     libvlc_video_set_callbacks(mp, lockStatic, unlockStatic, displayStatic, this);
     libvlc_video_set_format(mp, "RGBA", videoWidth, videoHeight, videoWidth * 4);
 
