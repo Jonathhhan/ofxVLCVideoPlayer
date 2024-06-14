@@ -6,7 +6,7 @@ void ofApp::setup() {
     ofBackground(255, 255, 255);
     ofSetWindowTitle("ofxVLCVideoPlayerVisualExample");
     ofSetFrameRate(60);
-    char const* vlc_argv[] = { "--vout=opengl", "--no-video", "--audio-visual=goom" };
+    char const* vlc_argv[] = { "--vout=opengl", "--no-video", "--audio-visual=goom", "--goom-width=1280", "--goom-height=720" };
     int vlc_argc = sizeof(vlc_argv) / sizeof(*vlc_argv);
     player.loadMovie("https://acidpauli.pushtopull.org/files/2010/acid-pauli-vs-hometrainer-ritter-butzke-2010-05-23.mp3", vlc_argc, vlc_argv);
     player.setLoop(true);
