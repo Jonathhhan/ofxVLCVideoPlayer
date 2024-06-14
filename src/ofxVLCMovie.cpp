@@ -5,7 +5,8 @@
 
 VLCMovie::VLCMovie(std::string filename)
     : filename(filename), frontImage(&image[1]), backImage(&image[0]), isLooping(true),
-    movieFinished(false), isInitialized(false), frontTexture(NULL) {
+    movieFinished(false), isInitialized(false), frontTexture(NULL), libvlc(NULL), eventManager(NULL),
+    m(NULL), mp(NULL), videoHeight(0), videoWidth(0), video_length_ms(0) {
     cout << "VLCMovie constructor" << endl;
 }
 
@@ -22,7 +23,7 @@ void VLCMovie::init(int vlc_argc, char const* vlc_argv[]) {
         return;
     }
 
-    if ("http" == filename.substr(0, 4)) {
+    if (ofStringTimesInString(filename, "://") == 1) {
         m = libvlc_media_new_location(libvlc, filename.c_str());
     }
     else {
